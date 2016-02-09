@@ -89,7 +89,7 @@
     if (options.types) {
       this.options.types = options.types;
     }
-    
+
     this.input = input;
     this.$input = $(input);
 
@@ -188,7 +188,7 @@
         options.componentRestrictions = {country: this.options.country};
       }
 
-      this.autocomplete = new google.maps.places.Autocomplete(
+      this.autocomplete = new google.maps.places.SearchBox(
         this.input, options
       );
 
@@ -203,14 +203,17 @@
       // Watch `place_changed` events on the autocomplete input field.
       google.maps.event.addListener(
         this.autocomplete,
-        'place_changed',
-        $.proxy(this.placeChanged, this)
+        'places_changed',
+        $.proxy(this.placesChanged, this)
       );
 
       // Prevent parent form from being submitted if user hit enter.
-      this.$input.on('keypress.' + this._name, function(event){
-        if (event.keyCode === 13){ return false; }
-      });
+      this.$input.on('keypress.' + this._name, $.proxy(function(event){
+        if (event.keyCode === 13){
+          // this.find();
+          return false;
+        }
+      }, this));
 
       // Assume that if user types anything after having selected a result,
       // the selected location is not valid any more.
@@ -536,8 +539,12 @@
 
     // Update the plugin after the user has selected an autocomplete entry.
     // If the place has no geometry it passes it to the geocoder.
-    placeChanged: function(){
-      var place = this.autocomplete.getPlace();
+    placesChanged: function(){
+      var places = this.autocomplete.getPlaces();
+      if (!places.length) {
+        return;
+      }
+      var place = places[0];
       this.selected = true;
 
       if (!place.geometry){
