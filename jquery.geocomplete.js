@@ -455,7 +455,7 @@
         bounds = geometry.bounds;
 
       // Create a simplified version of the address components.
-      $.each(result.address_components, function(index, object){
+      $.each(result.address_components || [], function(index, object){
         var name = object.types[0];
 
         $.each(object.types, function(index, name){
